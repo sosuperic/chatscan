@@ -1,5 +1,5 @@
 # radar
-Radar chart visualizations
+Radar chart visualizations for Engagement Fingerprints
 
 ## TODO
 - Break out javascript into radar.js file
