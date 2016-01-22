@@ -236,6 +236,15 @@
               .attr("stroke", "#0065cc")
               .attr("stroke-width", 2);
 
+            svg.insert('svg:defs', ":first-child")
+                .attr('class', 'blob') // TODO: clean up g/class wonkiness
+                .insert('filter')
+                .attr("id", "saturate")
+                .append('feColorMatrix')
+              .attr("in", "SourceGraphic")
+              .attr("type", "saturate")
+              .attr("values", ".0");
+
             img_blob.append('image')
                 .attr('class', 'blob') // TODO: clean up g/class wonkiness
               .attr('xlink:href', 'imgs/' + name + '.jpg')
@@ -244,6 +253,7 @@
                 .attr('height', 2*img_pad_ratio*radius)
                 .attr('width',  2*img_pad_ratio*radius)
               .attr('opacity', 0.4)
+              .attr('filter', 'url(#saturate)')
               .attr('clip-path', 'url(#pic2)');
         }
         draw_img_blob();
