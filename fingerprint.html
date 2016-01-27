@@ -21,7 +21,7 @@
     <div>
       INTERMEDIATE CONTROL POINTS: &nbsp;&nbsp;<input type="range" id="intermediatePtsSlider" min="0.0" max="1.0" step="0.01" value="0.4" style="width: 100px;">
     </div>
-	<div id="viz"></div>
+        <div id="viz"></div>
     <script>
         /*************************************************************************
         * VARIABLES TO BE SET BY USER
@@ -31,6 +31,8 @@
         const CSV_PATH = 'data/test_data.csv';
         const FIG_DIM = 300;                // Width and height of one figure
         const MAX_SVG_WIDTH = 1300;         // Will determine how many figures in a row
+        const NORMALIZE_DATA = false;
+        const NORMALIZE_BY = 'all'       // 'person', 'all'
 
         // Adjust the constants
         var radius = FIG_DIM * 0.25;        
@@ -38,6 +40,18 @@
         var label_fontsize = radius / 14;
         var name_fontsize = radius / 7.5;
         var label_vertical_spacing = label_fontsize * 1.5;
+
+        /*************************************************************************
+        * Helper functions
+        **************************************************************************/
+        function max_of_array(array) {
+            return Math.max.apply(Math, array);
+        }
+        function max_of_nested_array(arrays) {
+            return d3.max(arrays, function(array) {
+                return  d3.max(array);
+            });
+        }
 
         /*************************************************************************
         * READ CSV, SET VARIABLES, DRAW
@@ -86,6 +100,25 @@
                     all_signals.push(signals);
                 }
                 num_signals = signals.length;
+
+                // Normalize data
+                if (NORMALIZE_DATA) {   // Instead of x-min / (max-min), compute x / max
+                    if (NORMALIZE_BY == 'person') {
+                        for (var i = 0; i < num_figs; i++) {
+                            var max_value = max_of_array(all_signals[i]);
+                            for (var j = 0; j < all_signals[i].length; j++) {
+                                all_signals[i][j] /= max_value;
+                            }
+                        }
+                    } else if (NORMALIZE_BY == 'all') {
+                        var max_value = max_of_nested_array(all_signals);
+                        for (var i = 0; i < num_figs; i++) {
+                            for (var j = 0; j < all_signals[i].length; j++) {
+                                all_signals[i][j] /= max_value;
+                            }
+                        }
+                    }
+                }
 
                 // Now that width and height defined, append svg
                 svg = d3.select("#viz")
