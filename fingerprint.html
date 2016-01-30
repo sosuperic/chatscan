@@ -27,9 +27,12 @@
         * VARIABLES TO BE SET BY USER
         **************************************************************************/
         const DISPLAY_NAME = true;
+        const DISPLAY_PHOTO = false;
         const DISPLAY_AXES = false;
         const CSV_PATH = 'data/test_data.csv';
         const FIG_DIM = 300;                // Width and height of one figure
+        const DISPLAY_METRICS = false;
+        const DISPLAY_METRIC_DETAIL = false;
         const MAX_SVG_WIDTH = 1300;         // Will determine how many figures in a row
         const NORMALIZE_DATA = false;
         const NORMALIZE_BY = 'all'       // 'person', 'all'
@@ -269,7 +272,9 @@
                     .attr('filter', 'url(#saturate)')
                     .attr('clip-path', 'url(#pic)');
             }
-            draw_img_blob(i);
+            if (DISPLAY_PHOTO) {
+                draw_img_blob(i);
+            }
             
             // DRAW COLOR BLOB.
             function draw_color_blob(i) {
@@ -369,42 +374,44 @@
             /************************************************************************
             * ADD LABELS FOR EACH AXIS
             **************************************************************************/
-            labels = fig_svg
-                .append('g')
-                .attr('class', 'axisLabels')
-                .selectAll('text')
-                .data(metrics)
-                .enter()
-                .append('g')
-                .attr('class', 'axisLabel')
-                .append('text')
-                .attr('x', function(d, i) {return label_vertices[i][0]; })
-                .attr('y', function(d, i) {return label_vertices[i][1]; })
-                .text(function(d,i) {return d.toUpperCase(); })
-                .attr('font-family', 'Helvetica, sans-serif')
-                .attr('font-size', label_fontsize)
-                .attr('opacity', 0.6)
-                .attr('font-weight', 900)
-                .attr('letter-spacing', '2px')
-                .attr('text-anchor', 'middle');
-              
-            function insert_line_breaks(d, i) { // Break multi-word labels across lines
-                var el = d3.select(this);
-                var words = d.split(' ');
-                el.text('');
-                for (var j = 0; j < words.length; j++) {
-                    var tspan = el.append('tspan').text(words[j].toUpperCase());
-                    if (j > 0)
-                        tspan.attr('x', label_vertices[i][0])
-                            .attr('dy', label_vertical_spacing);
-                }
-            };
-            fig_svg.selectAll('.axisLabel text').each(insert_line_breaks);
+            if (DISPLAY_METRICS) {
+                labels = fig_svg
+                    .append('g')
+                    .attr('class', 'axisLabels')
+                    .selectAll('text')
+                    .data(metrics)
+                    .enter()
+                    .append('g')
+                    .attr('class', 'axisLabel')
+                    .append('text')
+                    .attr('x', function(d, i) {return label_vertices[i][0]; })
+                    .attr('y', function(d, i) {return label_vertices[i][1]; })
+                    .text(function(d,i) {return d.toUpperCase(); })
+                    .attr('font-family', 'Helvetica, sans-serif')
+                    .attr('font-size', label_fontsize)
+                    .attr('opacity', 0.6)
+                    .attr('font-weight', 900)
+                    .attr('letter-spacing', '2px')
+                    .attr('text-anchor', 'middle');
+                  
+                function insert_line_breaks(d, i) { // Break multi-word labels across lines
+                    var el = d3.select(this);
+                    var words = d.split(' ');
+                    el.text('');
+                    for (var j = 0; j < words.length; j++) {
+                        var tspan = el.append('tspan').text(words[j].toUpperCase());
+                        if (j > 0)
+                            tspan.attr('x', label_vertices[i][0])
+                                .attr('dy', label_vertical_spacing);
+                    }
+                };
+                fig_svg.selectAll('.axisLabel text').each(insert_line_breaks);
+            }
 
              /************************************************************************
              * ADD METRIC DETAILS 
              **************************************************************************/
-            if (typeof metric_details !== 'undefined') {
+            if (DISPLAY_METRICS && typeof metric_details !== 'undefined') {
                 label_details = fig_svg
                   .append('g')
                   .attr('id', 'axisLabelDetails')
@@ -464,7 +471,9 @@
                 $('#fig_' + i + ' .blob').remove();
                 define_cardinal_line();            // In case tension changed
                 blob_coords = get_blob_coords(center, blob_polygon_vertices, signals);  // In case ctrl pts changed
-                draw_img_blob(i);
+                if (DISPLAY_PHOTO) {
+                    draw_img_blob(i);
+                }
                 draw_color_blob(i);
             }
         }
