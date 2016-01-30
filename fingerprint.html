@@ -278,10 +278,10 @@
                     .attr('class', 'blob')
                     .append('path')
                     .attr('d', cardinal_line(blob_coords))
-                    .attr("stroke", "#0065cc")
-                    .attr("stroke-width", 2)
                     .attr('opacity', 0.5)
                     .attr('fill', '#0065cc')
+                    // .attr("stroke", "#0065cc")
+                    // .attr("stroke-width", 2)
             }
             draw_color_blob(i);
 
@@ -300,28 +300,28 @@
                 .attr('cx', small_c_radius)
                 .attr('cy', small_c_radius)
                 .attr('r', small_c_radius)
-                .attr("stroke", "#193366")
-                .attr("stroke-width", 1)
                 .attr('fill', 'cccccc')
                 .attr('opacity', 0.05);
+                // .attr("stroke", "#193366")
+                // .attr("stroke-width", 1)
             fig_svg
                 .append('circle')
                 .attr('cx', center[0])
                 .attr('cy', center[1])
                 .attr('r', 0.75 * radius)
-                .attr("stroke", "#193366")
-                .attr("stroke-width", 1)
                 .attr('fill', 'cccccc')
                 .attr('opacity', 0.04);
+                // .attr("stroke", "#193366")
+                // .attr("stroke-width", 1)
             fig_svg
                 .append('circle')
                 .attr('cx', center[0])
                 .attr('cy', center[1])
                 .attr('r', radius)
-                .attr("stroke", "#193366")
-                .attr("stroke-width", 1)
                 .attr('fill', 'cccccc')
                 .attr('opacity', 0.03);
+                // .attr("stroke", "#193366")
+                // .attr("stroke-width", 1)
 
             /************************************************************************
             * ADD FINAL SCORE TO MIDDLE OF BLOB
