@@ -221,15 +221,20 @@
                         x = center[0] + signals[i/2] * (vertices[i][0] - center[0]);
                         y = center[1] + signals[i/2] * (vertices[i][1] - center[1]);
                     } else {        // Intermediate vertex
-
-                        // If metric value is small, dont' want large intermediate ctrl pts to artifically make blob bigger 
+                        // If metric value is small, dont' want large intermediate ctrl pts to artifically make blob bigger
                         var prev_signals_idx = Math.round((i-1)/2); //
                         var next_signals_idx = Math.round((i+1)/2 % signals.length);
+                        var a = signals[prev_signals_idx];
+                        var b = signals[next_signals_idx];
+                        var theta = 360 / signals.length * Math.PI / 180; // Rad
+                        // Law of cosines to find length of segment connecting neighboring points
+                        var c = Math.sqrt(a*a + b*b - 2*a*b*Math.cos(theta))
+                        // Length of angle bisector
+                        // Formula: https://proofwiki.org/wiki/Length_of_Angle_Bisector
+                        var d = Math.sqrt((a*b)/((a+b)*(a+b)) * ((a+b)*(a+b) - c*c));
                         var scale = Math.min(
-                            signals[prev_signals_idx],
-                            signals[next_signals_idx],
-                            $('#intermediatePtsSlider').val() // a reasonable value seems to be 0.73
-                            );
+                            d,
+                            $('#intermediatePtsSlider').val());
                         x = center[0] + scale * (vertices[i][0] - center[0]);
                         y = center[1] + scale * (vertices[i][1] - center[1]);
                     }
