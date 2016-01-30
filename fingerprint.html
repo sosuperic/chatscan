@@ -16,10 +16,10 @@
     
 <body>
     <!-- 0.6 seems like a reasonable default value for both aesthetically -->
-    <div>
+    <div class="tweaks">
       TENSION: &nbsp;&nbsp;<input type="range" id="tensionSlider" min="0.0" max="1.0" step="0.01" value="0.6" style="width: 100px;">
     </div>
-    <div>
+    <div class="tweaks">
       INTERMEDIATE CONTROL POINTS: &nbsp;&nbsp;<input type="range" id="intermediatePtsSlider" min="0.0" max="1.0" step="0.01" value="0.6" style="width: 100px;">
     </div>
         <div id="viz"></div>
@@ -37,6 +37,11 @@
         const MAX_SVG_WIDTH = 1300;         // Will determine how many figures in a row
         const NORMALIZE_DATA = false;
         const NORMALIZE_BY = 'all'       // 'person', 'all'
+        const PRESENTATION_MODE = false;
+
+        if (PRESENTATION_MODE) {
+            $('.tweaks').hide();
+        }
 
         // Adjust the constants
         var radius = FIG_DIM * 0.25;        
