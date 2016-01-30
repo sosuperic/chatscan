@@ -199,7 +199,7 @@
             **************************************************************************/
             // Line used to make closed loop for blob
             function define_cardinal_line() {
-                var tension = $('#tensionSlider').val();
+                var tension = $('#tensionSlider').val(); // a reasonable value seems to be 0.76
                 cardinal_line = d3.svg.line()
                 .x(function(d) { return d[0]; })
                 .y(function(d) { return d[1]; })
@@ -225,7 +225,7 @@
                         var scale = Math.min(
                             signals[prev_signals_idx],
                             signals[next_signals_idx],
-                            $('#intermediatePtsSlider').val()
+                            $('#intermediatePtsSlider').val() // a reasonable value seems to be 0.73
                             );
                         x = center[0] + scale * (vertices[i][0] - center[0]);
                         y = center[1] + scale * (vertices[i][1] - center[1]);
