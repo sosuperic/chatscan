@@ -197,6 +197,45 @@
             blob_polygon_vertices = get_polygon_vertices(num_signals*2, radius); // n*2 for intermediate pts
             label_vertices = get_polygon_vertices(num_signals, label_radius);
 
+            /************************************************************************
+            * DRAW BACKGROUND CIRCLES
+            **************************************************************************/
+            var circle_opacity = 0.03;
+            var circle_color = '000000'
+            var small_c_radius = 0.5 * radius;
+            var small_c = fig_svg.append('g')
+                .attr('id', 'backgroundCs')
+                .attr('transform', function() {
+                    var start_x = center[0] - small_c_radius;
+                    var start_y = center[1] - small_c_radius;
+                    return 'translate(' + start_x + ',' + start_y + ')';});
+            small_c
+                .append('circle')
+                .attr('cx', small_c_radius)
+                .attr('cy', small_c_radius)
+                .attr('r', small_c_radius)
+                // .attr("stroke", "#193366")
+                // .attr("stroke-width", 1)
+                .attr('fill', circle_color)
+                .attr('opacity', circle_opacity);
+            fig_svg
+                .append('circle')
+                .attr('cx', center[0])
+                .attr('cy', center[1])
+                .attr('r', 0.75 * radius)
+                // .attr("stroke", "#193366")
+                // .attr("stroke-width", 1)
+                .attr('fill', circle_color)
+                .attr('opacity', circle_opacity);
+            fig_svg
+                .append('circle')
+                .attr('cx', center[0])
+                .attr('cy', center[1])
+                .attr('r', radius)
+                // .attr("stroke", "#193366")
+                // .attr("stroke-width", 1)
+                .attr('fill', circle_color)
+                .attr('opacity', circle_opacity);
 
             /*************************************************************************
             * DRAW BLOBS
@@ -295,46 +334,6 @@
                     .attr('fill', '#7CBEC6')
             }
             draw_color_blob(i);
-
-            /************************************************************************
-            * DRAW BACKGROUND CIRCLES
-            **************************************************************************/
-            var circle_opacity = 0.03;
-            var circle_color = '000000'
-            var small_c_radius = 0.5 * radius;
-            var small_c = fig_svg.append('g')
-                .attr('id', 'backgroundCs')
-                .attr('transform', function() {
-                    var start_x = center[0] - small_c_radius;
-                    var start_y = center[1] - small_c_radius;
-                    return 'translate(' + start_x + ',' + start_y + ')';});
-            small_c
-                .append('circle')
-                .attr('cx', small_c_radius)
-                .attr('cy', small_c_radius)
-                .attr('r', small_c_radius)
-                // .attr("stroke", "#193366")
-                // .attr("stroke-width", 1)
-                .attr('fill', circle_color)
-                .attr('opacity', circle_opacity);
-            fig_svg
-                .append('circle')
-                .attr('cx', center[0])
-                .attr('cy', center[1])
-                .attr('r', 0.75 * radius)
-                // .attr("stroke", "#193366")
-                // .attr("stroke-width", 1)
-                .attr('fill', circle_color)
-                .attr('opacity', circle_opacity);
-            fig_svg
-                .append('circle')
-                .attr('cx', center[0])
-                .attr('cy', center[1])
-                .attr('r', radius)
-                // .attr("stroke", "#193366")
-                // .attr("stroke-width", 1)
-                .attr('fill', circle_color)
-                .attr('opacity', circle_opacity);
 
             /************************************************************************
             * ADD FINAL SCORE TO MIDDLE OF BLOB
