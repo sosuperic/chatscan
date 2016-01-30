@@ -288,6 +288,8 @@
             /************************************************************************
             * DRAW BACKGROUND CIRCLES
             **************************************************************************/
+            var circle_opacity = 0.03;
+            var circle_color = '000000'
             var small_c_radius = 0.5 * radius;
             var small_c = fig_svg.append('g')
                 .attr('id', 'backgroundCs')
@@ -300,28 +302,28 @@
                 .attr('cx', small_c_radius)
                 .attr('cy', small_c_radius)
                 .attr('r', small_c_radius)
-                .attr('fill', 'cccccc')
-                .attr('opacity', 0.05);
                 // .attr("stroke", "#193366")
                 // .attr("stroke-width", 1)
+                .attr('fill', circle_color)
+                .attr('opacity', circle_opacity);
             fig_svg
                 .append('circle')
                 .attr('cx', center[0])
                 .attr('cy', center[1])
                 .attr('r', 0.75 * radius)
-                .attr('fill', 'cccccc')
-                .attr('opacity', 0.04);
                 // .attr("stroke", "#193366")
                 // .attr("stroke-width", 1)
+                .attr('fill', circle_color)
+                .attr('opacity', circle_opacity);
             fig_svg
                 .append('circle')
                 .attr('cx', center[0])
                 .attr('cy', center[1])
                 .attr('r', radius)
-                .attr('fill', 'cccccc')
-                .attr('opacity', 0.03);
                 // .attr("stroke", "#193366")
                 // .attr("stroke-width", 1)
+                .attr('fill', circle_color)
+                .attr('opacity', circle_opacity);
 
             /************************************************************************
             * ADD FINAL SCORE TO MIDDLE OF BLOB
