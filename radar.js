@@ -32,7 +32,6 @@ function render_radars(path, tweak_mode) {
         $('.tweaks').hide();
     }
 
-
     // Variables from sliders
     // Adjust the constants
     var radius = FIG_DIM * 0.25;        
@@ -329,11 +328,11 @@ function render_radars(path, tweak_mode) {
                 .append('g')
                 .attr("class", "a axis")
                 .selectAll("g")
-                .data(d3.range(90 - 360/n, 360, 360/n))
+                .data(d3.range(90 - 360/num_signals, 360, 360/num_signals))
                 .enter().append("g")
                 .attr("transform", function(d) { return "rotate(" + -d + ")"; })
                 .append("line")
-                .attr('x1', 30)
+                .attr('x1', 0)
                 .attr("x2", radius)
                 .attr("stroke", "#193366")
                 .attr("stroke-width", 1)
