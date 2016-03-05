@@ -241,7 +241,20 @@ function render_radars(data_or_path, tweak_mode) {
 
     // Input needs to be turned into spectrum colorpicker
     function initialize_colorpicker() {
-        $("#blob_color").spectrum({color: '#7CBEC6', showInput: true});
+        $("#blob_color").spectrum({
+            color: '#7CBEC6',
+            showInput: true,
+            move: function(color) {
+                update_blob_color(color);
+                update_hex_text(color);
+            }
+        });
+        function update_blob_color(color) {
+            $('.blob path').css({'fill': color.toHexString()});
+        }
+        function update_hex_text(color) {
+            $('#blob_color_hex').text(color.toHexString());
+        }
     }
 
     /*************************************************************************
@@ -588,9 +601,6 @@ function render_radars(data_or_path, tweak_mode) {
         * TODO: Update shapes without fully redrawing? Having trouble with tension.
         **************************************************************************/
         $('input.local').on('input', function() {
-            redraw_blob(i);
-        });
-        $('input.local').on('change', function() {
             redraw_blob(i);
         });
 
