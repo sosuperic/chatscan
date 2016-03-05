@@ -587,6 +587,9 @@ function render_radars(data_or_path, tweak_mode) {
         * REDRAW BLOBS WHEN pointiness or fullness slider changes
         * TODO: Update shapes without fully redrawing? Having trouble with tension.
         **************************************************************************/
+        $('input.local').on('input', function() {
+            redraw_blob(i);
+        });
         $('input.local').on('change', function() {
             redraw_blob(i);
         });
