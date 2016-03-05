@@ -436,7 +436,6 @@ function render_radars(path, tweak_mode) {
         * TODO: Update shapes without fully redrawing? Having trouble with tension.
         **************************************************************************/
         $('input').on('change', function() {
-            tension = $('#tensionSlider').val();
             redraw_blobs(i);
         });
 
