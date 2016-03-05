@@ -58,37 +58,8 @@ function normalize_signals(all_signals, num_figs, normalize_by) {
 }
 
 /*************************************************************************
-* READ CSV, SET VARIABLES, DRAW
+* MAIN FUNCTION
 **************************************************************************/
-function add_tweaks_html() {
-    $("#viz").before('<div id="tweaks">\
-        <div>\
-            POINTINESS: &nbsp;&nbsp;<input type="range" class="tweak local" id="tension_slider" min="0.0" max="1.0" step="0.01" value="0.6" style="width: 100px;">\
-        </div>\
-        <div>\
-            FULLNESS: &nbsp;&nbsp;<input type="range" class="tweak local" id="intermediate_pts_slider" min="0.0" max="1.0" step="0.01" value="0.6" style="width: 100px;">\
-        </div>\
-        <div>\
-            SIZE OF ONE RADAR PLOT: <input class="tweak global" id="fig_dim" type="text" value="250">\
-        </div>\
-        <div>\
-            OVERALL WIDTH: <input class="tweak global" id="max_svg_width" type="text" value="1300">\
-        </div>\
-    </div><br>\
-    <div>\
-        <button type="button" id="download" class="save-as-image">Save as PNG</button>\
-    </div>');
-
-    /*************************************************************************
-    * Listener for download button
-    **************************************************************************/
-    $("#download").on("click", function() {
-        saveSvgAsPng(document.getElementById("main_svg"),
-                'radar.png',
-                {scale: 1.0});
-    });
-}
-
 function render_radars(data_or_path, tweak_mode) {
     // Html elements for tweaks. This goes before the #viz div
     add_tweaks_html();
@@ -107,8 +78,9 @@ function render_radars(data_or_path, tweak_mode) {
     var svg, width, height;
     var radius, label_radius, label_fontsize, name_fontsize, label_vertical_spacing;
 
-    // Variables to be defined and updated from csv
+    // Variables to be defined and updated from data
     // Constant across figures 
+    var start, end;                 // This is only present in JSON/js obj
     var num_figs,
         num_signals,
         metrics = [];               // e.g. Mentions Count, Immigration
@@ -180,6 +152,8 @@ function render_radars(data_or_path, tweak_mode) {
 
     // Used both when reading from json file and when given object
     function process_jsonobj_and_draw(data) {
+        start = data['start'];
+        end = data['end'];
         var data = data['data'];
         num_figs = Object.size(data);
         
@@ -216,6 +190,41 @@ function render_radars(data_or_path, tweak_mode) {
         intermediate_pts_value = $('#intermediate_pts_slider').val();
         fig_dim = parseInt($('#fig_dim').val());
         max_svg_width = parseInt($('#max_svg_width').val());
+    }
+
+    function add_tweaks_html() {
+        $("#viz").before('<div id="tweaks">\
+            <div>\
+                POINTINESS: &nbsp;&nbsp;<input type="range" class="tweak local" id="tension_slider" min="0.0" max="1.0" step="0.01" value="0.6" style="width: 100px;">\
+            </div>\
+            <div>\
+                FULLNESS: &nbsp;&nbsp;<input type="range" class="tweak local" id="intermediate_pts_slider" min="0.0" max="1.0" step="0.01" value="0.6" style="width: 100px;">\
+            </div>\
+            <div>\
+                SIZE OF ONE RADAR PLOT: <input class="tweak global" id="fig_dim" type="text" value="250">\
+            </div>\
+            <div>\
+                OVERALL WIDTH: <input class="tweak global" id="max_svg_width" type="text" value="1300">\
+            </div>\
+        </div><br>\
+        <div>\
+            <button type="button" id="download" class="save-as-image">Save as PNG</button>\
+        </div>');
+
+        /*************************************************************************
+        * Listener for download button
+        **************************************************************************/
+        $("#download").on("click", function() {
+            var filename;
+            if ((typeof(start) !== 'undefined') && (typeof(end) !== 'undefined')) {
+                filename = start + '_to_' + end;
+            } else {
+                filename = 'radar.png';
+            }
+            saveSvgAsPng(document.getElementById("main_svg"),
+                    filename,
+                    {scale: 1.0});
+        });
     }
 
     /*************************************************************************
