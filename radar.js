@@ -74,7 +74,19 @@ function add_tweaks_html() {
         <div>\
             OVERALL WIDTH: <input class="tweak global" id="max_svg_width" type="text" value="1300">\
         </div>\
+    </div><br>\
+    <div>\
+        <button type="button" id="download" class="save-as-image">Save as PNG</button>\
     </div>');
+
+    /*************************************************************************
+    * Listener for download button
+    **************************************************************************/
+    $("#download").on("click", function() {
+        saveSvgAsPng(document.getElementById("main_svg"),
+                'radar.png',
+                {scale: 1.0});
+    });
 }
 
 function render_radars(data_or_path, tweak_mode) {
@@ -195,7 +207,7 @@ function render_radars(data_or_path, tweak_mode) {
         fig_dim = parseInt($('#fig_dim').val());
         max_svg_width = parseInt($('#max_svg_width').val());
     }
-           
+
     /*************************************************************************
     * DRAW ALL FIGURES
     * - Listener will redraw if fig_dim or max_svg_width changes from tweak params
