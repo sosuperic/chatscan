@@ -17,13 +17,14 @@
     
 <body>
     <!-- 0.6 seems like a reasonable default value for both aesthetically -->
-    <div class="tweaks">
-      TENSION: &nbsp;&nbsp;<input type="range" id="tensionSlider" min="0.0" max="1.0" step="0.01" value="0.6" style="width: 100px;">
-    </div>
-    <div class="tweaks">
-      INTERMEDIATE CONTROL POINTS: &nbsp;&nbsp;<input type="range" id="intermediatePtsSlider" min="0.0" max="1.0" step="0.01" value="0.6" style="width: 100px;">
-    </div>
-        <div id="viz"></div>
+    <div id='tweaks'>
+        <div class="tweak">
+          TENSION: &nbsp;&nbsp;<input type="range" id="tensionSlider" min="0.0" max="1.0" step="0.01" value="0.6" style="width: 100px;">
+        </div>
+        <div class="tweak">
+          INTERMEDIATE CONTROL POINTS: &nbsp;&nbsp;<input type="range" id="intermediatePtsSlider" min="0.0" max="1.0" step="0.01" value="0.6" style="width: 100px;">
+        </div>
+    <div id="viz"></div>
     <script>
         /*************************************************************************
         * VARIABLES TO BE SET BY USER
