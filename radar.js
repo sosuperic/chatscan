@@ -44,7 +44,7 @@ function add_tweaks_html() {
     </div>');
 }
 
-function render_radars(path, tweak_mode) {
+function render_radars(data_or_path, tweak_mode) {
     // Html elements for tweaks. This goes before the #viz div
     add_tweaks_html();
 
@@ -71,56 +71,60 @@ function render_radars(path, tweak_mode) {
     var all_signals = [],
         all_names  = [];
 
-    d3.csv(path, function(data) {
-        // Set width and height of svg using num_figs
-        // Width is either a) width of figs, e.g. max_svg_width = 1400, 1 fig of fig_dim 500
-        // or b) filled in as wide as possible (after which it wraps to next row)
-        num_figs = data.length;
-        // Add metrics
-        for (var key in data[0]) {  // Add metrics
-            if (key != 'Name') {
-                metrics.push(key);
-            }
-        }
-
-        // Add name and signals
-        for (var i = 0; i < num_figs; i++) {
-            signals = [];
-
-            for (var key in data[i]) {  // Add name and signals
-                if (key == 'Name') {
-                    all_names.push(data[i][key]);
-                } else {
-                    signals.push(parseFloat(data[i][key]));
-
-                }
-            }
-            all_signals.push(signals);
-        }
-        num_signals = signals.length;
-
-        // Normalize data
-        if (NORMALIZE_DATA) {   // Instead of x-min / (max-min), compute x / max
-            if (NORMALIZE_BY == 'person') {
-                for (var i = 0; i < num_figs; i++) {
-                    var max_value = max_of_array(all_signals[i]);
-                    for (var j = 0; j < all_signals[i].length; j++) {
-                        all_signals[i][j] /= max_value;
+    if (typeof(data_or_path) === 'string') {    // Path given
+        if (data_or_path.endsWith('csv')) {
+            d3.csv(data_or_path, function(data) {
+                    // Set width and height of svg using num_figs
+                    // Width is either a) width of figs, e.g. max_svg_width = 1400, 1 fig of fig_dim 500
+                    // or b) filled in as wide as possible (after which it wraps to next row)
+                    num_figs = data.length;
+                    // Add metrics
+                    for (var key in data[0]) {  // Add metrics
+                        if (key != 'Name') {
+                            metrics.push(key);
+                        }
                     }
-                }
-            } else if (NORMALIZE_BY == 'all') {
-                var max_value = max_of_nested_array(all_signals);
-                for (var i = 0; i < num_figs; i++) {
-                    for (var j = 0; j < all_signals[i].length; j++) {
-                        all_signals[i][j] /= max_value;
-                    }
-                }
-            }
-        }
 
-        // Draw
-        draw_all_figures();
-    });
+                    // Add name and signals
+                    for (var i = 0; i < num_figs; i++) {
+                        signals = [];
+
+                        for (var key in data[i]) {  // Add name and signals
+                            if (key == 'Name') {
+                                all_names.push(data[i][key]);
+                            } else {
+                                signals.push(parseFloat(data[i][key]));
+                            }
+                        }
+                        all_signals.push(signals);
+                    }
+                    num_signals = signals.length;
+
+                    // Normalize data
+                    if (NORMALIZE_DATA) {   // Instead of x-min / (max-min), compute x / max
+                        if (NORMALIZE_BY == 'person') {
+                            for (var i = 0; i < num_figs; i++) {
+                                var max_value = max_of_array(all_signals[i]);
+                                for (var j = 0; j < all_signals[i].length; j++) {
+                                    all_signals[i][j] /= max_value;
+                                }
+                            }
+                        } else if (NORMALIZE_BY == 'all') {
+                            var max_value = max_of_nested_array(all_signals);
+                            for (var i = 0; i < num_figs; i++) {
+                                for (var j = 0; j < all_signals[i].length; j++) {
+                                    all_signals[i][j] /= max_value;
+                                }
+                            }
+                        }
+                    }
+
+                    // Draw
+                    draw_all_figures();
+            });
+        }
+    }
+
 
     function update_tweak_params() {
         tension = $('#tension_slider').val();
