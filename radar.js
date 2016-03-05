@@ -220,7 +220,7 @@ function render_radars(data_or_path, tweak_mode) {
             </div>\
         </div><br>\
         <div>\
-            <button type="button" id="download" class="save-as-image">Save as PNG</button>\
+            <button type="button" id="download">Save as PNG</button>\
         </div>');
 
         /*************************************************************************
@@ -235,7 +235,7 @@ function render_radars(data_or_path, tweak_mode) {
             }
             saveSvgAsPng(document.getElementById("main_svg"),
                     filename,
-                    {scale: 1.0});
+                    {scale: 2.0});
         });
     }
 
