@@ -29,7 +29,7 @@ function max_of_nested_array(arrays) {
 **************************************************************************/
 function render_radars(path, tweak_mode) {
     if (!tweak_mode) {
-        $('.tweaks').hide();
+        $('#tweaks').hide();
     }
 
     // Variables from tweaks
