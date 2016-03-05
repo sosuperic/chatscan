@@ -63,6 +63,7 @@ function normalize_signals(all_signals, num_figs, normalize_by) {
 function render_radars(data_or_path, tweak_mode) {
     // Html elements for tweaks. This goes before the #viz div
     add_tweaks_html();
+    initialize_colorpicker();
 
     // Hide or show the tweak parameters. Note that the defaults are set in add_tweaks_html
     if (!tweak_mode) {
@@ -72,6 +73,7 @@ function render_radars(data_or_path, tweak_mode) {
     // Variables from tweaks
     var fig_dim, max_svg_width;
     var tension, intermediate_pts_value;
+    var color_blob_opacity, blob_color;
     update_tweak_params();          // Reads tweak params from sliders
 
     // Variables derived from tweak variables
@@ -188,8 +190,11 @@ function render_radars(data_or_path, tweak_mode) {
     function update_tweak_params() {
         tension = $('#tension_slider').val();
         intermediate_pts_value = $('#intermediate_pts_slider').val();
+        color_blob_opacity = $('#color_blob_opacity').val();
         fig_dim = parseInt($('#fig_dim').val());
         max_svg_width = parseInt($('#max_svg_width').val());
+        blob_color = $('#blob_color').spectrum('get').toHexString()
+        $('#blob_color_hex').text(blob_color);  // Update color hex code next to picker
     }
 
     function add_tweaks_html() {
@@ -199,6 +204,13 @@ function render_radars(data_or_path, tweak_mode) {
             </div>\
             <div>\
                 FULLNESS: &nbsp;&nbsp;<input type="range" class="tweak local" id="intermediate_pts_slider" min="0.0" max="1.0" step="0.01" value="0.6" style="width: 100px;">\
+            </div>\
+            <div>\
+                COLOR OPACITY: &nbsp;&nbsp;<input type="range" class="tweak local" id="color_blob_opacity" min="0.0" max="1.0" step="0.01" value="0.9" style="width: 100px;">\
+            </div>\
+            <div>\
+                COLOR: &nbsp;&nbsp;<input type="text" class="tweak local" id="blob_color">\
+                <label id="blob_color_hex"></label>\
             </div>\
             <div>\
                 SIZE OF ONE RADAR PLOT: <input class="tweak global" id="fig_dim" type="text" value="250">\
@@ -225,6 +237,11 @@ function render_radars(data_or_path, tweak_mode) {
                     filename,
                     {scale: 1.0});
         });
+    }
+
+    // Input needs to be turned into spectrum colorpicker
+    function initialize_colorpicker() {
+        $("#blob_color").spectrum({color: '#7CBEC6', showInput: true});
     }
 
     /*************************************************************************
@@ -438,10 +455,9 @@ function render_radars(data_or_path, tweak_mode) {
                 .attr('class', 'blob')
                 .append('path')
                 .attr('d', cardinal_line(blob_coords))
-                // .attr("stroke", "#0065cc")
                 // .attr("stroke-width", 2)
-                // .attr('opacity', 0.5)
-                .attr('fill', '#7CBEC6')
+                .attr('opacity', color_blob_opacity)
+                .attr('fill', blob_color);
         }
         draw_color_blob(i);
 
