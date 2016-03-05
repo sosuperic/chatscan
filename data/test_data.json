@@ -1,0 +1,20 @@
+{
+  "start": "2015-07-21",
+  "end": "2015-07-27",
+  "data": {
+    "John Kasich": {
+      "immigration": 4,
+      "economy": 3.23,
+      "foreign policy": 2.56,
+      "education": 2.89,
+      "guns": 1.2
+    },
+    "Hillary Clinton": {
+      "immigration": 2.6,
+      "economy": 3.3,
+      "foreign policy": 5.3,
+      "education": 1.2,
+      "guns": 4.4
+    }
+  }
+}

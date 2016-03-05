@@ -34,13 +34,14 @@
         const MAX_SVG_WIDTH = 1300;         // Will determine how many figures in a row
 
         // These may need to be changed, depending on your use case
-        const CSV_PATH = 'data/blatant-assoc_topic-cand_2016-01-01_-_2016-01-29.csv';
+        // const PATH = 'data/blatant-assoc_topic-cand_2016-01-01_-_2016-01-29.csv';
+        const PATH = 'data/test_data.json';
         const TWEAK_MODE = true;
-        const NORMALIZE_DATA = false;
+        const NORMALIZE_DATA = true;
         const NORMALIZE_BY = 'person'       // 'person', 'all'
         const DISPLAY_PHOTO = false;
 
-        render_radars(CSV_PATH, TWEAK_MODE);
+        render_radars(PATH, TWEAK_MODE);
 
         
     </script>
