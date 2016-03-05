@@ -120,12 +120,17 @@ function render_radars(data_or_path, tweak_mode) {
     * READ DATA AND DRAW
     * - Listener will redraw if fig_dim or max_svg_width changes from tweak params
     **************************************************************************/
-    
-    if (typeof(data_or_path) === 'string') {    // Path given
-        if (data_or_path.endsWith('csv')) {
-            read_csv_and_draw(data_or_path);
-        } else if (data_or_path.endsWith('json')) {
-            read_json_and_draw(data_or_path);
+    process_and_render(data_or_path);
+
+    function process_and_render(data_or_path) {
+        if (typeof(data_or_path) === 'string') {    // Path given
+            if (data_or_path.endsWith('csv')) {
+                read_csv_and_draw(data_or_path);
+            } else if (data_or_path.endsWith('json')) {
+                read_json_and_draw(data_or_path);
+            }
+        } else {
+            process_jsonobj_and_draw(data_or_path);
         }
     }
 
@@ -168,37 +173,42 @@ function render_radars(data_or_path, tweak_mode) {
     }
 
     function read_json_and_draw(path) {
-        d3.json(data_or_path, function(error, data) {
-            var data = data['data'];
-            num_figs = Object.size(data);
-            
-            // Add metrics names - just get it from the first 
-            for (var key in data) {
-                for (var topic in data[key]) {
-                    metrics.push(topic);
-                }
-                break;
-            }
-
-            // Add names and signals
-            for (var key in data) {
-                signals = [];
-                all_names.push(to_title_case(key));
-                for (var topic in data[key]) {
-                    signals.push(data[key][topic]);
-                }
-                all_signals.push(signals);
-            }
-            num_signals = all_signals[0].length;
-
-            // Normalize data
-            if (NORMALIZE_DATA) {   // Instead of x-min / (max-min), compute x / max
-                normalize_signals(all_signals, num_figs, NORMALIZE_BY);
-            }
-
-            // Draw
-            draw_all_figures();
+        d3.json(path, function(error, data) {
+            process_jsonobj_and_draw(data);
         });
+    }
+
+    // Used both when reading from json file and when given object
+    function process_jsonobj_and_draw(data) {
+        var data = data['data'];
+        num_figs = Object.size(data);
+        
+        // Add metrics names - just get it from the first 
+        for (var key in data) {
+            for (var topic in data[key]) {
+                metrics.push(topic);
+            }
+            break;
+        }
+
+        // Add names and signals
+        for (var key in data) {
+            signals = [];
+            all_names.push(to_title_case(key));
+            for (var topic in data[key]) {
+                signals.push(data[key][topic]);
+            }
+            all_signals.push(signals);
+        }
+        num_signals = all_signals[0].length;
+
+        // Normalize data
+        if (NORMALIZE_DATA) {   // Instead of x-min / (max-min), compute x / max
+            normalize_signals(all_signals, num_figs, NORMALIZE_BY);
+        }
+
+        // Draw
+        draw_all_figures();
     }
 
     function update_tweak_params() {

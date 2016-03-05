@@ -12,7 +12,7 @@ Radar chart visualizations
   Eric,0.3,0.4,0.5
   Atlas,0.2,0.6,0.4
 ```
-## JSON files
+## JSON files / Javascript objects
 - File format:
 ```
 {

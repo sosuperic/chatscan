@@ -35,14 +35,34 @@
         const MAX_SVG_WIDTH = 1300;         // Will determine how many figures in a row
 
         // These may need to be changed, depending on your use case
-        // const PATH = 'data/blatant-assoc_topic-cand_2016-01-01_-_2016-01-29.csv';
-        const PATH = 'data/test_data.json';
+        // const DATA_OR_PATH = 'data/blatant-assoc_topic-cand_2016-01-01_-_2016-01-29.csv';
+        // const DATA_OR_PATH = 'data/test_data.json';
+        const DATA_OR_PATH = {
+              "start": "2015-07-21",
+              "end": "2015-07-27",
+              "data": {
+                "John Kasich": {
+                  "immigration": 4,
+                  "economy": 3.23,
+                  "foreign policy": 2.56,
+                  "education": 2.89,
+                  "guns": 1.2
+                },
+                "Hillary Clinton": {
+                  "immigration": 2.6,
+                  "economy": 3.3,
+                  "foreign policy": 5.3,
+                  "education": 1.2,
+                  "guns": 4.4
+                }
+              }
+            }
         const TWEAK_MODE = true;
         const NORMALIZE_DATA = true;
         const NORMALIZE_BY = 'person'       // 'person', 'all'
         const DISPLAY_PHOTO = false;
 
-        render_radars(PATH, TWEAK_MODE);
+        render_radars(DATA_OR_PATH, TWEAK_MODE);
 
         
     </script>
