@@ -18,12 +18,19 @@
 <body>
     <!-- 0.6 seems like a reasonable default value for both aesthetically -->
     <div id='tweaks'>
-        <div class="tweak">
-          TENSION: &nbsp;&nbsp;<input type="range" id="tensionSlider" min="0.0" max="1.0" step="0.01" value="0.6" style="width: 100px;">
+        <div>
+            POINTINESS: &nbsp;&nbsp;<input type="range" class="tweak local" id="tension_slider" min="0.0" max="1.0" step="0.01" value="0.6" style="width: 100px;">
         </div>
-        <div class="tweak">
-          INTERMEDIATE CONTROL POINTS: &nbsp;&nbsp;<input type="range" id="intermediatePtsSlider" min="0.0" max="1.0" step="0.01" value="0.6" style="width: 100px;">
+        <div>
+            FULLNESS: &nbsp;&nbsp;<input type="range" class="tweak local" id="intermediate_pts_slider" min="0.0" max="1.0" step="0.01" value="0.6" style="width: 100px;">
         </div>
+        <div>
+            SIZE OF ONE RADAR PLOT: <input class="tweak global" id='fig_dim' type="text" value="250">
+        </div>
+        <div>
+            OVERALL WIDTH: <input class="tweak global" id='max_svg_width' type="text" value="1300">
+        </div>
+    </div>
     <div id="viz"></div>
     <script>
         /*************************************************************************

@@ -32,17 +32,17 @@ function render_radars(path, tweak_mode) {
         $('.tweaks').hide();
     }
 
-    // Variables from sliders
-    // Adjust the constants
-    var radius = FIG_DIM * 0.25;        
-    var label_radius = radius * 1.4;    
-    var label_fontsize = radius / 10;
-    var name_fontsize = radius / 5;
-    var label_vertical_spacing = label_fontsize * 1.5;
+    // Variables from tweaks
+    var fig_dim, max_svg_width;
+    var tension, intermediate_pts_value;
+    update_tweak_params();          // Reads tweak params from sliders
+
+    // Variables derived from tweak variables
+    var svg, width, height;
+    var radius, label_radius, label_fontsize, name_fontsize, label_vertical_spacing;
 
     // Variables to be defined and updated from csv
     // Constant across figures 
-    var svg, width, height;         // W & H depend on number of people.
     var num_figs,
         num_signals,
         metrics = [];               // e.g. Mentions Count, Immigration
@@ -52,12 +52,9 @@ function render_radars(path, tweak_mode) {
 
     d3.csv(path, function(data) {
         // Set width and height of svg using num_figs
-        // Width is either a) width of figs, e.g. MAX_SVG_WIDTH = 1400, 1 fig of FIG_DIM 500
+        // Width is either a) width of figs, e.g. max_svg_width = 1400, 1 fig of fig_dim 500
         // or b) filled in as wide as possible (after which it wraps to next row)
         num_figs = data.length;
-        width = Math.min(num_figs * FIG_DIM, MAX_SVG_WIDTH - (MAX_SVG_WIDTH % FIG_DIM));
-        height = (Math.floor((num_figs * FIG_DIM) / width) + 1) * FIG_DIM;
-
         // Add metrics
         for (var key in data[0]) {  // Add metrics
             if (key != 'Name') {
@@ -100,24 +97,47 @@ function render_radars(path, tweak_mode) {
             }
         }
 
-        // Now that width and height defined, append svg
-        svg = d3.select("#viz")
-            .append("svg")
-            .attr("width", width)
-            .attr("height", height);
-
-        // Draw figures
+        // Draw
         draw_all_figures();
     });
 
+    function update_tweak_params() {
+        tension = $('#tension_slider').val();
+        intermediate_pts_value = $('#intermediate_pts_slider').val();
+        fig_dim = parseInt($('#fig_dim').val());
+        max_svg_width = parseInt($('#max_svg_width').val());
+    }
+
+           
+    /*************************************************************************
+    * DRAW ALL FIGURES
+    * - Listener will redraw if fig_dim or max_svg_width changes from tweak params
+    **************************************************************************/
     function get_grid_offset(i) {   // Get translate offset for ith out of n figures
-        var off_x = (i % (width / FIG_DIM)) * FIG_DIM;
-        var off_y = Math.floor((i * FIG_DIM) / width) * FIG_DIM;
+        var off_x = (i % (width / fig_dim)) * fig_dim;
+        var off_y = Math.floor((i * fig_dim) / width) * fig_dim;
         var offset = [off_x, off_y];
         return offset;
     }
 
     function draw_all_figures() {
+        // Width and height derived from tweak params
+        width = Math.min(num_figs * fig_dim, max_svg_width - (max_svg_width % fig_dim));
+        height = (Math.floor((num_figs * fig_dim) / width) + 1) * fig_dim;
+        svg = d3.select("#viz")
+            .append("svg")
+            .attr('id', 'main_svg')
+            .attr("width", width)
+            .attr("height", height);
+
+        // Variables derived from tweak params
+        radius = fig_dim * 0.25;        
+        label_radius = radius * 1.4;    
+        label_fontsize = radius / 10;
+        name_fontsize = radius / 5;
+        label_vertical_spacing = label_fontsize * 1.5;
+
+        // Draw individual blobs
         for (var i = 0; i < num_figs; i++) {
             draw_one_figure(
                 all_signals[i],
@@ -127,15 +147,25 @@ function render_radars(path, tweak_mode) {
         }
     }
 
+    // Redraw all figures if fig_dim or max_svg_width changed from input
+    $('input.global').on('change', function() {
+        $('#main_svg').remove();
+        update_tweak_params();
+        draw_all_figures();
+    })
 
+    /*************************************************************************
+    * DRAW ONE FIGURE
+    * - Listener will update each figure if pointiness or fullness changes
+    **************************************************************************/
     function draw_one_figure(signals, name, offset, i) {
         /*************************************************************************
         * Variables to be defined and updated
         **************************************************************************/
-        var tension, cardinal_line;
+        var cardinal_line;
         var blob_polygon_vertices, blob_coords;
         var label_vertices; 
-        var center = [FIG_DIM / 2, FIG_DIM / 2];
+        var center = [fig_dim / 2, fig_dim / 2];
 
         /*************************************************************************
         * Group for this figure
@@ -204,15 +234,14 @@ function render_radars(path, tweak_mode) {
         * DRAW BLOBS
         **************************************************************************/
         // Line used to make closed loop for blob
-        function define_cardinal_line() {
-            var tension = $('#tensionSlider').val();
+        function define_cardinal_line(tension) {
             cardinal_line = d3.svg.line()
             .x(function(d) { return d[0]; })
             .y(function(d) { return d[1]; })
             .interpolate("cardinal-closed")
             .tension(tension);
         }
-        define_cardinal_line();
+        define_cardinal_line(tension);
 
         // Get blobs vertices using vertices of regular polygon
         // blob_polygon_vertices has n*2 sides for the intermediate points of the blob
@@ -237,7 +266,7 @@ function render_radars(path, tweak_mode) {
                     var d = Math.sqrt((a*b)/((a+b)*(a+b)) * ((a+b)*(a+b) - c*c));
                     var scale = Math.min(
                         d,
-                        $('#intermediatePtsSlider').val());
+                        $('#intermediate_pts_slider').val());
                     x = center[0] + scale * (vertices[i][0] - center[0]);
                     y = center[1] + scale * (vertices[i][1] - center[1]);
                 }
@@ -245,7 +274,7 @@ function render_radars(path, tweak_mode) {
             }
             return coords;
         };
-        blob_coords = get_blob_coords(center, blob_polygon_vertices, signals);
+        blob_coords = get_blob_coords(center, blob_polygon_vertices, signals, intermediate_pts_value);
 
         function draw_img_blob(i) {
             // TODO: better img_pad_ratio. Point is for max value to not outermost circle
@@ -419,29 +448,20 @@ function render_radars(path, tweak_mode) {
                 .attr('letter-spacing', '0px')
                 .attr('text-anchor', 'middle');
         }
-        /************************************************************************
-
-        * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
-
-        * * * * * * * * * * * * * EVENT LISTENERS * * * * * * * * * * * * * * * * 
-
-        * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
-        
-        ************************************************************************/
-
 
         /************************************************************************
-        * REDRAW BLOBS WHEN SLIDER MOVES
+        * REDRAW BLOBS WHEN pointiness or fullness slider changes
         * TODO: Update shapes without fully redrawing? Having trouble with tension.
         **************************************************************************/
-        $('input').on('change', function() {
-            redraw_blobs(i);
+        $('input.local').on('change', function() {
+            redraw_blob(i);
         });
 
-        function redraw_blobs(i) {
+        function redraw_blob(i) {
+            update_tweak_params();
             $('#fig_' + i + ' .blob').remove();
-            define_cardinal_line();            // In case tension changed
-            blob_coords = get_blob_coords(center, blob_polygon_vertices, signals);  // In case ctrl pts changed
+            define_cardinal_line(tension);            // In case tension changed
+            blob_coords = get_blob_coords(center, blob_polygon_vertices, signals, intermediate_pts_value);  // In case ctrl pts changed
             if (DISPLAY_PHOTO) {
                 draw_img_blob(i);
             }
