@@ -27,7 +27,28 @@ function max_of_nested_array(arrays) {
 /*************************************************************************
 * READ CSV, SET VARIABLES, DRAW
 **************************************************************************/
+function add_tweaks_html() {
+    $("#viz").before('<div id="tweaks">\
+        <div>\
+            POINTINESS: &nbsp;&nbsp;<input type="range" class="tweak local" id="tension_slider" min="0.0" max="1.0" step="0.01" value="0.6" style="width: 100px;">\
+        </div>\
+        <div>\
+            FULLNESS: &nbsp;&nbsp;<input type="range" class="tweak local" id="intermediate_pts_slider" min="0.0" max="1.0" step="0.01" value="0.6" style="width: 100px;">\
+        </div>\
+        <div>\
+            SIZE OF ONE RADAR PLOT: <input class="tweak global" id="fig_dim" type="text" value="250">\
+        </div>\
+        <div>\
+            OVERALL WIDTH: <input class="tweak global" id="max_svg_width" type="text" value="1300">\
+        </div>\
+    </div>');
+}
+
 function render_radars(path, tweak_mode) {
+    // Html elements for tweaks. This goes before the #viz div
+    add_tweaks_html();
+
+    // Hide or show the tweak parameters. Note that the defaults are set in add_tweaks_html
     if (!tweak_mode) {
         $('#tweaks').hide();
     }
