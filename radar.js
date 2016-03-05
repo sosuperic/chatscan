@@ -144,7 +144,7 @@ function render_radars(path, tweak_mode) {
     function draw_all_figures() {
         // Width and height derived from tweak params
         width = Math.min(num_figs * fig_dim, max_svg_width - (max_svg_width % fig_dim));
-        height = (Math.floor((num_figs * fig_dim) / width) + 1) * fig_dim;
+        height = (Math.ceil((num_figs * FIG_DIM) / width)) * FIG_DIM;
         svg = d3.select("#viz")
             .append("svg")
             .attr('id', 'main_svg')
