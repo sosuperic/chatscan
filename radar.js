@@ -27,7 +27,12 @@ function max_of_nested_array(arrays) {
 /*************************************************************************
 * READ CSV, SET VARIABLES, DRAW
 **************************************************************************/
-function render_radars(path) {
+function render_radars(path, tweak_mode) {
+    if (!tweak_mode) {
+        $('.tweaks').hide();
+    }
+
+
     // Variables from sliders
     // Adjust the constants
     var radius = FIG_DIM * 0.25;        

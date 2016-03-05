@@ -38,13 +38,9 @@
         const MAX_SVG_WIDTH = 1300;         // Will determine how many figures in a row
         const NORMALIZE_DATA = false;
         const NORMALIZE_BY = 'all'       // 'person', 'all'
-        const PRESENTATION_MODE = false;
 
-        if (PRESENTATION_MODE) {
-            $('.tweaks').hide();
-        }
-
-        render_radars(CSV_PATH);
+        const TWEAK_MODE = true;
+        render_radars(CSV_PATH, TWEAK_MODE);
 
         
     </script>
