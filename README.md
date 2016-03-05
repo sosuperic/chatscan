@@ -38,7 +38,7 @@ Radar chart visualizations
 ```
 
 ## TODO
-- Only modify CSS when updating blob sliders, don't redraw
+- Only modify CSS when updating blob opacity sliders, don't redraw
 - Option to use different scale (e.g. log) using D3 scales
 - Position the picture in center of blob
 - Calculate area of blob (using cross product / Green's Theorem?)
