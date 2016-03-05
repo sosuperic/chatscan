@@ -13,6 +13,5 @@ Radar chart visualizations
 
 ## TODO
 - Option to use different scale (e.g. log) using D3 scales
-- Break out javascript into radar.js file
 - Position the picture in center of blob
 - Calculate area of blob (using cross product / Green's Theorem?)
