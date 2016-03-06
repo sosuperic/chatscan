@@ -3,7 +3,9 @@ Radar chart visualizations
 
 ## Usage
 - Your HTML should have an empty div with id viz, i.e. `<div id="viz"></div>`
-- After importing radar.js and the required js/css dependencies, call `render_radars(data_or_path, params)`, where data_or_path is either a js object or a path to a csv/json file, and params is an associative array that controls display parameters, as well as data normalization parameters. 
+- After importing radar.js and the required js/css dependencies, call `render_radars(data_or_path, params, default_tweak_params)`, where data_or_path is either a js object or a path to a csv/json file, params is an associative array that controls display/data normalization parameters, and default_tweak_params is 
+an associative array that controls default values for tweakable paramters such as 
+size and color. 
 
 ## Parameters
 - Found in read_params of render_radars (default values also defined here)
