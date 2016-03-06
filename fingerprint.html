@@ -53,9 +53,18 @@
             'display_axes': false,
             'normalize_data': true,
             'normalize_by': 'person',
-        }
+        };
 
-        render_radars(DATA_OR_PATH, params);
+        var tweak_default_params = {
+            'tension': 0.8,
+            'intermediate_pts_value': 0.3,
+            // 'color_blob_opacity': 0.2,
+            'blob_color': '#323232',
+            'fig_dim': 100,
+            // 'max_svg_width': 500,
+        };
+
+        render_radars(DATA_OR_PATH, params, tweak_default_params);
 
         
     </script>

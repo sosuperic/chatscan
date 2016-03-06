@@ -16,6 +16,15 @@ Radar chart visualizations
 - normalize_data: boolean, option to normalize data
 - normalize_by: string - 'person' or 'all', normalize per radar chart or across all 
 
+## Tweak Paramters
+- Default values found in initialize_tweak_params and initialize_colorpicker
+- tension: float in [0.0, 1.0], controls tension of cardinal line, i.e. how pointy blob is
+- intermediate_pts_value: float in [0.0, 1.0], controls radius of intermediate control points, i.e. how 'full' the blob is
+- color_blob_opacity: float in [0.0, 1.0]
+- blob_color: hexstring
+- fig_dim: int, controls how large individual radar chart is
+- max_svg_width: int, controls maximum width of svg
+
 ## Running fingerprint.html
 - Because files cannot be opened in browsers locally, run a webserver for that directory e.g.
   `python -m SimpleHTTPServer 8888 &` and visit http://localhost:8888/fingerprint.html

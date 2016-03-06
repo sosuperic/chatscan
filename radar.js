@@ -46,7 +46,7 @@ function normalize_signals(all_signals, num_figs, normalize_by) {
 /*************************************************************************
 * MAIN FUNCTION
 **************************************************************************/
-function render_radars(data_or_path, params) {
+function render_radars(data_or_path, params, tweak_default_params) {
     // Define Param variables
     var display_name, display_axes, display_metrics, display_metric_detail, display_photo;
     var tweak_mode;
@@ -67,20 +67,15 @@ function render_radars(data_or_path, params) {
         normalize_by = (typeof params['normalize_by'] === 'undefined') ? 'person' : params['normalize_by'];
     }
 
-    // Html elements for tweaks. This goes before the #viz div
-    add_html();
-    initialize_colorpicker();
-
-    // Hide or show the tweak parameters. Note that the defaults are set in add_tweaks_html
-    if (!tweak_mode) {
-        $('#tweaks').hide();
-    }
-
-    // Variables from tweaks
+    // Variables for tweaks
     var fig_dim, max_svg_width;
     var tension, intermediate_pts_value;
     var color_blob_opacity, blob_color;
-    update_tweak_params();          // Reads tweak params from sliders
+    add_tweaks_html(tweak_default_params);
+    update_tweak_params();      // Reads tweak param variables from sliders
+    if (!tweak_mode) {          // Hide or show the tweak parameters. 
+        $('#tweaks').hide();
+    }
 
     // Variables derived from tweak variables
     var svg, width, height;
@@ -194,8 +189,8 @@ function render_radars(data_or_path, params) {
     }
 
     function update_tweak_params() {
-        tension = $('#tension_slider').val();
-        intermediate_pts_value = $('#intermediate_pts_slider').val();
+        tension = $('#tension').val();
+        intermediate_pts_value = $('#intermediate_pts_value').val();
         color_blob_opacity = $('#color_blob_opacity').val();
         fig_dim = parseInt($('#fig_dim').val());
         max_svg_width = parseInt($('#max_svg_width').val());
@@ -203,16 +198,18 @@ function render_radars(data_or_path, params) {
         $('#blob_color_hex').text(blob_color);  // Update color hex code next to picker
     }
 
-    function add_html() {
-        add_tweaks_html();
+    function add_tweaks_html(tweak_default_params) {
+        add_html();
+        initialize_tweak_params(tweak_default_params);
+        initialize_colorpicker(tweak_default_params);
         add_download_html();
-        function add_tweaks_html() {
+        function add_html() {
             $("#viz").prepend('<div id="tweaks">\
                 <div>\
-                    POINTINESS: &nbsp;&nbsp;<input type="range" class="tweak local" id="tension_slider" min="0.0" max="1.0" step="0.01" value="0.6" style="width: 100px;">\
+                    POINTINESS: &nbsp;&nbsp;<input type="range" class="tweak local" id="tension" min="0.0" max="1.0" step="0.01" value="0.6" style="width: 100px;">\
                 </div>\
                 <div>\
-                    FULLNESS: &nbsp;&nbsp;<input type="range" class="tweak local" id="intermediate_pts_slider" min="0.0" max="1.0" step="0.01" value="0.6" style="width: 100px;">\
+                    FULLNESS: &nbsp;&nbsp;<input type="range" class="tweak local" id="intermediate_pts_value" min="0.0" max="1.0" step="0.01" value="0.6" style="width: 100px;">\
                 </div>\
                 <div>\
                     COLOR OPACITY: &nbsp;&nbsp;<input type="range" class="tweak local" id="color_blob_opacity" min="0.0" max="1.0" step="0.01" value="0.9" style="width: 100px;">\
@@ -229,15 +226,51 @@ function render_radars(data_or_path, params) {
                 </div>\
             </div><br>');
         }
+        function initialize_tweak_params(tweak_default_params) {
+            var params = {}
+            params['tension'] = (typeof tweak_default_params['tension'] === 'undefined') ? 0.6 : tweak_default_params['tension'];
+            params['intermediate_pts_value'] = (typeof tweak_default_params['intermediate_pts_value'] === 'undefined') ? 0.6 : tweak_default_params['intermediate_pts_value'];
+            params['color_blob_opacity'] = (typeof tweak_default_params['color_blob_opacity'] === 'undefined') ? 0.9 : tweak_default_params['color_blob_opacity'];
+            params['fig_dim'] = (typeof tweak_default_params['fig_dim'] === 'undefined') ? 250 : tweak_default_params['fig_dim'];
+            params['max_svg_width'] = (typeof tweak_default_params['max_svg_width'] === 'undefined') ? 750 : tweak_default_params['max_svg_width'];
+
+            for (var key in params) {
+                $('#' + key).val(params[key]);
+            }
+        }
+
+        // Input needs to be turned into spectrum colorpicker
+        function initialize_colorpicker(tweak_default_params) {
+            $("#blob_color").spectrum({
+                color: (typeof tweak_default_params['blob_color'] === 'undefined') ? '#7CBEC6' : tweak_default_params['blob_color'],
+                showInput: true,
+                move: function(color) {
+                    update_blob_color(color);
+                    update_hex_text(color);
+                },
+                change: function(color) {
+                    update_blob_color(color);
+                    update_hex_text(color);
+                }
+            });
+            function update_blob_color(color) {
+                $('.blob path').css({'fill': color.toHexString()});
+            }
+            function update_hex_text(color) {
+                $('#blob_color_hex').text(color.toHexString());
+            }
+        }
+
+        /*************************************************************************
+        * Add download button
+        **************************************************************************/
         function add_download_html() {
             $("#viz").prepend('<div>\
                 <button type="button" id="download">Save as PNG</button>\
             </div>');
         }
 
-        /*************************************************************************
-        * Listener for download button
-        **************************************************************************/
+        // Listener for download button
         $("#download").on("click", function() {
             var filename;
             if ((typeof(start) !== 'undefined') && (typeof(end) !== 'undefined')) {
@@ -249,28 +282,6 @@ function render_radars(data_or_path, params) {
                     filename,
                     {scale: 2.0});
         });
-    }
-
-    // Input needs to be turned into spectrum colorpicker
-    function initialize_colorpicker() {
-        $("#blob_color").spectrum({
-            color: '#7CBEC6',
-            showInput: true,
-            move: function(color) {
-                update_blob_color(color);
-                update_hex_text(color);
-            },
-            change: function(color) {
-                update_blob_color(color);
-                update_hex_text(color);
-            }
-        });
-        function update_blob_color(color) {
-            $('.blob path').css({'fill': color.toHexString()});
-        }
-        function update_hex_text(color) {
-            $('#blob_color_hex').text(color.toHexString());
-        }
     }
 
     /*************************************************************************
@@ -430,7 +441,7 @@ function render_radars(data_or_path, params) {
                     var d = Math.sqrt((a*b)/((a+b)*(a+b)) * ((a+b)*(a+b) - c*c));
                     var scale = Math.min(
                         d,
-                        $('#intermediate_pts_slider').val());
+                        $('#intermediate_pts_value').val());
                     x = center[0] + scale * (vertices[i][0] - center[0]);
                     y = center[1] + scale * (vertices[i][1] - center[1]);
                 }
