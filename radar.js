@@ -247,6 +247,10 @@ function render_radars(data_or_path, tweak_mode) {
             move: function(color) {
                 update_blob_color(color);
                 update_hex_text(color);
+            },
+            change: function(color) {
+                update_blob_color(color);
+                update_hex_text(color);
             }
         });
         function update_blob_color(color) {
