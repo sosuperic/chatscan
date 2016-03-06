@@ -1,7 +1,11 @@
 # radar
 Radar chart visualizations
 
-## Running
+## Usage
+- Your HTML should have an empty div with id viz, i.e. `<div id="viz"></div>`
+- After importing radar.js and the required js/css dependencies, call `render_radars(data_or_path, show_tweaks)`, where data_or_path is either a js object or a path to a csv/json file, and show_tweaks is a boolean denoting whether or not to show the tweakable parameters controlling size and color.
+
+## Running fingerprint.html
 - Because files cannot be opened in browsers locally, run a webserver for that directory e.g.
   `python -m SimpleHTTPServer 8888 &` and visit http://localhost:8888/fingerprint.html
 
