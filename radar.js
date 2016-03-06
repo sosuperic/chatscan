@@ -1,17 +1,3 @@
-
-/************************************************************************
-
-* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
-
-* * * * * * * * * * * * * DRAWING FIGURES * * * * * * * * * * * * * * * * 
-
-* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
-
-************************************************************************/
-
-
-
-
 /*************************************************************************
 * Helper functions
 **************************************************************************/
@@ -62,7 +48,7 @@ function normalize_signals(all_signals, num_figs, normalize_by) {
 **************************************************************************/
 function render_radars(data_or_path, tweak_mode) {
     // Html elements for tweaks. This goes before the #viz div
-    add_tweaks_html();
+    add_html();
     initialize_colorpicker();
 
     // Hide or show the tweak parameters. Note that the defaults are set in add_tweaks_html
@@ -197,31 +183,37 @@ function render_radars(data_or_path, tweak_mode) {
         $('#blob_color_hex').text(blob_color);  // Update color hex code next to picker
     }
 
-    function add_tweaks_html() {
-        $("#viz").before('<div id="tweaks">\
-            <div>\
-                POINTINESS: &nbsp;&nbsp;<input type="range" class="tweak local" id="tension_slider" min="0.0" max="1.0" step="0.01" value="0.6" style="width: 100px;">\
-            </div>\
-            <div>\
-                FULLNESS: &nbsp;&nbsp;<input type="range" class="tweak local" id="intermediate_pts_slider" min="0.0" max="1.0" step="0.01" value="0.6" style="width: 100px;">\
-            </div>\
-            <div>\
-                COLOR OPACITY: &nbsp;&nbsp;<input type="range" class="tweak local" id="color_blob_opacity" min="0.0" max="1.0" step="0.01" value="0.9" style="width: 100px;">\
-            </div>\
-            <div>\
-                COLOR: &nbsp;&nbsp;<input type="text" class="tweak local" id="blob_color">\
-                <label id="blob_color_hex"></label>\
-            </div>\
-            <div>\
-                SIZE OF ONE RADAR PLOT: <input class="tweak global" id="fig_dim" type="text" value="250">\
-            </div>\
-            <div>\
-                OVERALL WIDTH: <input class="tweak global" id="max_svg_width" type="text" value="1300">\
-            </div>\
-        </div><br>\
-        <div>\
-            <button type="button" id="download">Save as PNG</button>\
-        </div>');
+    function add_html() {
+        add_tweaks_html();
+        add_download_html();
+        function add_tweaks_html() {
+            $("#viz").before('<div id="tweaks">\
+                <div>\
+                    POINTINESS: &nbsp;&nbsp;<input type="range" class="tweak local" id="tension_slider" min="0.0" max="1.0" step="0.01" value="0.6" style="width: 100px;">\
+                </div>\
+                <div>\
+                    FULLNESS: &nbsp;&nbsp;<input type="range" class="tweak local" id="intermediate_pts_slider" min="0.0" max="1.0" step="0.01" value="0.6" style="width: 100px;">\
+                </div>\
+                <div>\
+                    COLOR OPACITY: &nbsp;&nbsp;<input type="range" class="tweak local" id="color_blob_opacity" min="0.0" max="1.0" step="0.01" value="0.9" style="width: 100px;">\
+                </div>\
+                <div>\
+                    COLOR: &nbsp;&nbsp;<input type="text" class="tweak local" id="blob_color">\
+                    <label id="blob_color_hex"></label>\
+                </div>\
+                <div>\
+                    SIZE OF ONE RADAR PLOT: <input class="tweak global" id="fig_dim" type="text" value="250">\
+                </div>\
+                <div>\
+                    OVERALL WIDTH: <input class="tweak global" id="max_svg_width" type="text" value="1300">\
+                </div>\
+            </div><br>');
+        }
+        function add_download_html() {
+            $("#viz").before('<div>\
+                <button type="button" id="download">Save as PNG</button>\
+            </div>');
+        }
 
         /*************************************************************************
         * Listener for download button
