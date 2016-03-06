@@ -3,7 +3,18 @@ Radar chart visualizations
 
 ## Usage
 - Your HTML should have an empty div with id viz, i.e. `<div id="viz"></div>`
-- After importing radar.js and the required js/css dependencies, call `render_radars(data_or_path, show_tweaks)`, where data_or_path is either a js object or a path to a csv/json file, and show_tweaks is a boolean denoting whether or not to show the tweakable parameters controlling size and color.
+- After importing radar.js and the required js/css dependencies, call `render_radars(data_or_path, params)`, where data_or_path is either a js object or a path to a csv/json file, and params is an associative array that controls display parameters, as well as data normalization parameters. 
+
+## Parameters
+- Found in read_params of render_radars (default values also defined here)
+- display_name: boolean, show name at bottom of radar
+- display_axes: boolean, show axes lines
+- display_metrics: boolean, show axes labels (e.g. categories)
+- display_metric_details: boolean, show extra information under each axes label (e.g. exact value of topic affinity); 
+- display_photo: boolean, show photo in blob. Photo filename must be same as name
+- tweak_mode: boolean, show tweakable parameters sliders and inputs controlling size and color
+- normalize_data: boolean, option to normalize data
+- normalize_by: string - 'person' or 'all', normalize per radar chart or across all 
 
 ## Running fingerprint.html
 - Because files cannot be opened in browsers locally, run a webserver for that directory e.g.

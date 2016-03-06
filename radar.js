@@ -46,7 +46,27 @@ function normalize_signals(all_signals, num_figs, normalize_by) {
 /*************************************************************************
 * MAIN FUNCTION
 **************************************************************************/
-function render_radars(data_or_path, tweak_mode) {
+function render_radars(data_or_path, params) {
+    // Define Param variables
+    var display_name, display_axes, display_metrics, display_metric_detail, display_photo;
+    var tweak_mode;
+    var normalize_data, normalize_by;
+    read_params(params);
+
+    function read_params(params) {
+        // If key is in params, set it to value. Otherwise, default value 
+        display_name = (typeof params['display_name'] === 'undefined') ? true : params['display_name'];
+        display_axes = (typeof params['display_axes'] === 'undefined') ? false : params['display_axes'];
+        display_metrics = (typeof params['display_metrics'] === 'undefined') ? true : params['display_metrics'];
+        display_metric_detail = (typeof params['display_metric_detail'] === 'undefined') ? false : params['display_metric_detail'];
+        display_photo = (typeof params['display_photo'] === 'undefined') ? false : params['display_photo'];
+
+        tweak_mode = (typeof params['tweak_mode'] === 'undefined') ? true : params['tweak_mode'];
+
+        normalize_data = (typeof params['normalize_data'] === 'undefined') ? true : params['normalize_data'];
+        normalize_by = (typeof params['normalize_by'] === 'undefined') ? 'person' : params['normalize_by'];
+    }
+
     // Html elements for tweaks. This goes before the #viz div
     add_html();
     initialize_colorpicker();
@@ -123,8 +143,8 @@ function render_radars(data_or_path, tweak_mode) {
             num_signals = signals.length;
 
             // Normalize data
-            if (NORMALIZE_DATA) {   // Instead of x-min / (max-min), compute x / max
-                normalize_signals(all_signals, num_figs, NORMALIZE_BY);
+            if (normalize_data) {   // Instead of x-min / (max-min), compute x / max
+                normalize_signals(all_signals, num_figs, normalize_by);
             }
 
             // Draw
@@ -165,8 +185,8 @@ function render_radars(data_or_path, tweak_mode) {
         num_signals = all_signals[0].length;
 
         // Normalize data
-        if (NORMALIZE_DATA) {   // Instead of x-min / (max-min), compute x / max
-            normalize_signals(all_signals, num_figs, NORMALIZE_BY);
+        if (normalize_data) {   // Instead of x-min / (max-min), compute x / max
+            normalize_signals(all_signals, num_figs, normalize_by);
         }
 
         // Draw
@@ -187,7 +207,7 @@ function render_radars(data_or_path, tweak_mode) {
         add_tweaks_html();
         add_download_html();
         function add_tweaks_html() {
-            $("#viz").before('<div id="tweaks">\
+            $("#viz").prepend('<div id="tweaks">\
                 <div>\
                     POINTINESS: &nbsp;&nbsp;<input type="range" class="tweak local" id="tension_slider" min="0.0" max="1.0" step="0.01" value="0.6" style="width: 100px;">\
                 </div>\
@@ -210,7 +230,7 @@ function render_radars(data_or_path, tweak_mode) {
             </div><br>');
         }
         function add_download_html() {
-            $("#viz").before('<div>\
+            $("#viz").prepend('<div>\
                 <button type="button" id="download">Save as PNG</button>\
             </div>');
         }
@@ -453,7 +473,7 @@ function render_radars(data_or_path, tweak_mode) {
                 .attr('filter', 'url(#saturate)')
                 .attr('clip-path', 'url(#pic)');
         }
-        if (DISPLAY_PHOTO) {
+        if (display_photo) {
             draw_img_blob(i);
         }
         
@@ -492,7 +512,7 @@ function render_radars(data_or_path, tweak_mode) {
         /************************************************************************
         * DRAW AXIS LINES
         **************************************************************************/
-        if (DISPLAY_AXES) {
+        if (display_axes) {
             var ga = fig_svg
                 .append("g")
                 .attr('id', 'axes')
@@ -514,7 +534,7 @@ function render_radars(data_or_path, tweak_mode) {
         /************************************************************************
         * ADD LABELS FOR EACH AXIS
         **************************************************************************/
-        if (DISPLAY_METRICS) {
+        if (display_metrics) {
             labels = fig_svg
                 .append('g')
                 .attr('class', 'axisLabels')
@@ -553,7 +573,7 @@ function render_radars(data_or_path, tweak_mode) {
          /************************************************************************
          * ADD METRIC DETAILS 
          **************************************************************************/
-        if (DISPLAY_METRICS && typeof metric_details !== 'undefined') {
+        if (display_metrics && typeof metric_details !== 'undefined') {
             label_details = fig_svg
               .append('g')
               .attr('id', 'axisLabelDetails')
@@ -576,7 +596,7 @@ function render_radars(data_or_path, tweak_mode) {
         /************************************************************************
         * ADD NAME TO BOTTOM OF FIGURE
         **************************************************************************/
-        if (DISPLAY_NAME) {
+        if (display_name) {
             fig_svg.append('g')
                 .attr('id', 'name')
                 .append('text')
@@ -605,7 +625,7 @@ function render_radars(data_or_path, tweak_mode) {
             $('#fig_' + i + ' .blob').remove();
             define_cardinal_line(tension);            // In case tension changed
             blob_coords = get_blob_coords(center, blob_polygon_vertices, signals, intermediate_pts_value);  // In case ctrl pts changed
-            if (DISPLAY_PHOTO) {
+            if (display_photo) {
                 draw_img_blob(i);
             }
             draw_color_blob(i);

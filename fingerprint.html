@@ -26,17 +26,6 @@
         /*************************************************************************
         * VARIABLES TO BE SET BY USER
         **************************************************************************/
-        // These likely don't need to be changed
-        const DISPLAY_NAME = true;
-        const DISPLAY_AXES = false;
-        const DISPLAY_METRICS = true;
-        const DISPLAY_METRIC_DETAIL = false;    // Display additional score/text for each metric
-
-        // These will be replaced as tweaks very soon...
-        const FIG_DIM = 250;                // Width and height of one figure
-        const MAX_SVG_WIDTH = 1300;         // Will determine how many figures in a row
-
-        // These may need to be changed, depending on your use case
         const DATA_OR_PATH = 'data/blatant-assoc_topic-cand_2016-01-01_-_2016-01-29.csv';
         // const DATA_OR_PATH = 'data/test_data.json';
         // const DATA_OR_PATH = {
@@ -57,12 +46,16 @@
         //         }
         //       }
         //     }
-        const TWEAK_MODE = true;
-        const NORMALIZE_DATA = true;
-        const NORMALIZE_BY = 'person'       // 'person', 'all'
-        const DISPLAY_PHOTO = false;
 
-        render_radars(DATA_OR_PATH, TWEAK_MODE);
+        // Other params and their defaults found in read_params of render_radars
+        var params = {
+            'tweak_mode': true,
+            'display_axes': false,
+            'normalize_data': true,
+            'normalize_by': 'person',
+        }
+
+        render_radars(DATA_OR_PATH, params);
 
         
     </script>
