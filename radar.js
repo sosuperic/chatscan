@@ -24,19 +24,14 @@ function to_title_case(str) {
     return str.replace(/\w\S*/g, function(txt){return txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase();});
 }
 
-function normalize_signals(all_signals, num_figs, normalize_by) {
+function normalize_signals(all_signals, normalize_by) {
     if (normalize_by == 'person') {
-        for (var i = 0; i < num_figs; i++) {
-            var max_value = max_of_array(all_signals[i]);
-            for (var j = 0; j < all_signals[i].length; j++) {
-                all_signals[i][j] /= max_value;
-            }
-        }
-    } else if (normalize_by == 'all') {
-        var max_value = max_of_nested_array(all_signals);
-        for (var i = 0; i < num_figs; i++) {
-            for (var j = 0; j < all_signals[i].length; j++) {
-                all_signals[i][j] /= max_value;
+        for (var key in all_signals) {      // Each e.g. person
+            for (var i = 0; i < all_signals[key].length; i++) {     // Each key, e.g. person can have multiple blobs
+                var max_value = max_of_array(all_signals[key][i]);
+                for (var j = 0; j < all_signals[key][i].length; j++) {
+                    all_signals[key][i][j] /= max_value;
+                }
             }
         }
     }
@@ -46,6 +41,9 @@ function normalize_signals(all_signals, num_figs, normalize_by) {
 /*************************************************************************
 * MAIN FUNCTION
 **************************************************************************/
+var global_time_period;
+var global_tweak_params;
+
 function render_radars(data_or_path, params, tweak_default_params) {
     // Define Param variables
     var display_name, display_axes, display_metrics, display_metric_detail, display_photo;
@@ -72,10 +70,19 @@ function render_radars(data_or_path, params, tweak_default_params) {
     var tension, intermediate_pts_value;
     var color_blob_opacity, blob_color;
     add_tweaks_html(tweak_default_params);
+    add_download_html();
     update_tweak_params();      // Reads tweak param variables from sliders
     if (!tweak_mode) {          // Hide or show the tweak parameters. 
         $('#tweaks').hide();
     }
+    update_global_vars();
+
+    // $(function () {
+    //   $('<script>')
+    //     .attr('type', 'text/javascript')
+    //     .text('function get_radar_params() { return "1", {}')
+    //     .appendTo('head');
+    // })
 
     // Variables derived from tweak variables
     var svg, width, height;
@@ -83,13 +90,16 @@ function render_radars(data_or_path, params, tweak_default_params) {
 
     // Variables to be defined and updated from data
     // Constant across figures 
-    var start, end;                 // This is only present in JSON/js obj
+    var starts = [], ends = [];               // Each list item in json has start and end for that time period
     var num_figs,
         num_signals,
-        metrics = [];               // e.g. Mentions Count, Immigration
+        metrics = [],            // e.g. Mentions Count, Immigration
+        num_time_periods = 0;           // Json can contain multiple affinity datasets per person, e.g. one for each time period
     // Varying across figures
-    var all_signals = [],
-        all_names  = [];
+    var all_signals = {};       // Key is name, value is list of lists
+
+    // For multiple time periods, transitions for blobs
+    var initial_time_period;   // First time drawing, transitions from initial state to initial state
 
     /*************************************************************************
     * READ DATA AND DRAW
@@ -99,52 +109,10 @@ function render_radars(data_or_path, params, tweak_default_params) {
 
     function process_and_render(data_or_path) {
         if (typeof(data_or_path) === 'string') {    // Path given
-            if (data_or_path.endsWith('csv')) {
-                read_csv_and_draw(data_or_path);
-            } else if (data_or_path.endsWith('json')) {
-                read_json_and_draw(data_or_path);
-            }
+            read_json_and_draw(data_or_path);
         } else {
             process_jsonobj_and_draw(data_or_path);
         }
-    }
-
-    function read_csv_and_draw(path) {
-        d3.csv(path, function(data) {
-            // Set width and height of svg using num_figs
-            // Width is either a) width of figs, e.g. max_svg_width = 1400, 1 fig of fig_dim 500
-            // or b) filled in as wide as possible (after which it wraps to next row)
-            num_figs = data.length;
-            // Add metrics
-            for (var key in data[0]) {  // Add metrics
-                if (key != 'Name') {
-                    metrics.push(key);
-                }
-            }
-
-            // Add name and signals
-            for (var i = 0; i < num_figs; i++) {
-                signals = [];
-
-                for (var key in data[i]) {  // Add name and signals
-                    if (key == 'Name') {
-                        all_names.push(data[i][key]);
-                    } else {
-                        signals.push(parseFloat(data[i][key]));
-                    }
-                }
-                all_signals.push(signals);
-            }
-            num_signals = signals.length;
-
-            // Normalize data
-            if (normalize_data) {   // Instead of x-min / (max-min), compute x / max
-                normalize_signals(all_signals, num_figs, normalize_by);
-            }
-
-            // Draw
-            draw_all_figures();
-        });            
     }
 
     function read_json_and_draw(path) {
@@ -154,34 +122,44 @@ function render_radars(data_or_path, params, tweak_default_params) {
     }
 
     // Used both when reading from json file and when given object
-    function process_jsonobj_and_draw(data) {
-        start = data['start'];
-        end = data['end'];
-        var data = data['data'];
-        num_figs = Object.size(data);
-        
-        // Add metrics names - just get it from the first 
-        for (var key in data) {
-            for (var topic in data[key]) {
+    function process_jsonobj_and_draw(json) {
+        // Add metrics names - just get it from the first
+        for (var key in json[0]['data']) {
+            for (var topic in json[0]['data'][key]) {
                 metrics.push(topic);
             }
             break;
         }
 
-        // Add names and signals
-        for (var key in data) {
-            signals = [];
-            all_names.push(to_title_case(key));
-            for (var topic in data[key]) {
-                signals.push(data[key][topic]);
+        for (var i = 0; i < json.length; i++) {
+            starts.push(json[i]['start']);
+            ends.push(json[i]['end']);
+            var data = json[i]['data'];
+
+            // Add names and signals
+            for (var key in data) {
+                signals = [];
+                for (var topic in data[key]) {
+                    signals.push(data[key][topic]);
+                }
+                if (!(key in all_signals)) {
+                    all_signals[key] = [];
+                }
+                all_signals[key].push(signals);
+                // Updating num_signals every time when it should always be the same
+                // because selecting an element from associatave array is cumbersome
+                num_signals = signals.length;
             }
-            all_signals.push(signals);
         }
-        num_signals = all_signals[0].length;
+        num_figs = Object.size(all_signals);
+        
+        // Keep track of max # time periods per person so we can create html for it
+        num_time_periods = json.length;
+        add_blob_transition_html(num_time_periods, params['initial_time_period']);
 
         // Normalize data
         if (normalize_data) {   // Instead of x-min / (max-min), compute x / max
-            normalize_signals(all_signals, num_figs, normalize_by);
+            normalize_signals(all_signals, normalize_by);
         }
 
         // Draw
@@ -202,27 +180,26 @@ function render_radars(data_or_path, params, tweak_default_params) {
         add_html();
         initialize_tweak_params(tweak_default_params);
         initialize_colorpicker(tweak_default_params);
-        add_download_html();
         function add_html() {
-            $("#viz").prepend('<div id="tweaks">\
+            $("#viz").prepend('<div id="tweaks" style="float:left;padding-left:50px"><label>Tweak the shape, color, size, and layout</label><br>\
                 <div>\
-                    POINTINESS: &nbsp;&nbsp;<input type="range" class="tweak local" id="tension" min="0.0" max="1.0" step="0.01" value="0.6" style="width: 100px;">\
+                    <label>POINTINESS: </label>&nbsp;&nbsp;<input type="range" class="tweak local" id="tension" min="0.0" max="1.0" step="0.01" value="0.6" style="width: 100px;">\
                 </div>\
                 <div>\
-                    FULLNESS: &nbsp;&nbsp;<input type="range" class="tweak local" id="intermediate_pts_value" min="0.0" max="1.0" step="0.01" value="0.6" style="width: 100px;">\
+                    <label>FULLNESS: </label>&nbsp;&nbsp;<input type="range" class="tweak local" id="intermediate_pts_value" min="0.0" max="1.0" step="0.01" value="0.6" style="width: 100px;">\
                 </div>\
                 <div>\
-                    COLOR OPACITY: &nbsp;&nbsp;<input type="range" class="tweak local" id="color_blob_opacity" min="0.0" max="1.0" step="0.01" value="0.9" style="width: 100px;">\
+                    <label>COLOR OPACITY: </label>&nbsp;&nbsp;<input type="range" class="tweak local" id="color_blob_opacity" min="0.0" max="1.0" step="0.01" value="0.9" style="width: 100px;">\
                 </div>\
                 <div>\
-                    COLOR: &nbsp;&nbsp;<input type="text" class="tweak local" id="blob_color">\
+                    <label>COLOR: </label>&nbsp;&nbsp;<input type="text" class="tweak local" id="blob_color">\
                     <label id="blob_color_hex"></label>\
                 </div>\
                 <div>\
-                    SIZE OF ONE RADAR PLOT: <input class="tweak global" id="fig_dim" type="text" value="250">\
+                    <label>SIZE OF ONE RADAR PLOT: </label><input class="tweak global" id="fig_dim" type="text" value="250">\
                 </div>\
                 <div>\
-                    OVERALL WIDTH: <input class="tweak global" id="max_svg_width" type="text" value="1300">\
+                    <label>OVERALL WIDTH: <label><input class="tweak global" id="max_svg_width" type="text" value="1300">\
                 </div>\
             </div><br>');
         }
@@ -247,10 +224,12 @@ function render_radars(data_or_path, params, tweak_default_params) {
                 move: function(color) {
                     update_blob_color(color);
                     update_hex_text(color);
+                    global_tweak_params['blob_color'] = color.toHexString();
                 },
                 change: function(color) {
                     update_blob_color(color);
                     update_hex_text(color);
+                    global_tweak_params['blob_color'] = color.toHexString();
                 }
             });
             function update_blob_color(color) {
@@ -260,15 +239,12 @@ function render_radars(data_or_path, params, tweak_default_params) {
                 $('#blob_color_hex').text(color.toHexString());
             }
         }
+    }
 
-        /*************************************************************************
-        * Add download button
-        **************************************************************************/
-        function add_download_html() {
-            $("#viz").prepend('<div>\
+    function add_download_html() {
+         $("#viz").prepend('<div style="float:left;padding-left:50px"><label>Download: </label>\
                 <button type="button" id="download">Save as PNG</button>\
-            </div>');
-        }
+            </div><br><br>');
 
         // Listener for download button
         $("#download").on("click", function() {
@@ -282,6 +258,25 @@ function render_radars(data_or_path, params, tweak_default_params) {
                     filename,
                     {scale: 2.0});
         });
+    }
+
+    function add_blob_transition_html(num_time_periods, time_period) {
+        var html = '<div id="time_periods" style="float:left;padding-left:50px">'
+        for (var i = 0; i < num_time_periods; i++) {
+            if (i == 0) {   // checked
+                html += '<input type="radio" class="time_period" name="time_period" value="' + i + '" checked><label> Time Period: ' + starts[i] + ' to ' + ends[i] + '</label><br>';
+            } else {
+                html += '<input type="radio" class="time_period" name="time_period" value="' + i + '"><label> Time Period: ' + starts[i] + ' to ' + ends[i] + '</label><br>';
+            }
+        }
+        html += '<div><br><br>'
+        $("#viz").prepend(html);
+        initialize_checked(time_period);
+
+        function initialize_checked(time_period) {
+            global_time_period = time_period;
+            $('input[name="time_period"][value="' + time_period + '"]').prop("checked", true);
+        }
     }
 
     /*************************************************************************
@@ -313,19 +308,26 @@ function render_radars(data_or_path, params, tweak_default_params) {
         label_vertical_spacing = label_fontsize * 1.5;
 
         // Draw individual blobs
-        for (var i = 0; i < num_figs; i++) {
+        var kth = 0; 
+        for (var key in all_signals) {
             draw_one_figure(
-                all_signals[i],
-                all_names[i],
-                get_grid_offset(i),
-                i);
+                all_signals[key],
+                key,
+                get_grid_offset(kth),
+                kth);
+            kth += 1;
         }
     }
 
+    /*
+    * Listener for global tweaks, i.e. ones that require redrawing of entire viz
+    * These are radar plot size and overall width
+    */
     // Redraw all figures if fig_dim or max_svg_width changed from input
     $('input.global').on('change', function() {
         $('#main_svg').remove();
         update_tweak_params();
+        update_global_vars();
         draw_all_figures();
     })
 
@@ -333,12 +335,13 @@ function render_radars(data_or_path, params, tweak_default_params) {
     * DRAW ONE FIGURE
     * - Listener will update each figure if pointiness or fullness changes
     **************************************************************************/
-    function draw_one_figure(signals, name, offset, i) {
+    function draw_one_figure(signals, name, offset, kth) {
         /*************************************************************************
         * Variables to be defined and updated
         **************************************************************************/
         var cardinal_line;
-        var blob_polygon_vertices, blob_coords;
+        var blob_polygon_vertices;
+        var blob_coords = [];   // list of lists
         var label_vertices; 
         var center = [fig_dim / 2, fig_dim / 2];
 
@@ -346,7 +349,7 @@ function render_radars(data_or_path, params, tweak_default_params) {
         * Group for this figure
         **************************************************************************/
         var fig_svg = svg.append('g')
-            .attr('id', 'fig_' + i)
+            .attr('id', 'fig_' + kth)
             .attr('class', 'fig')
             .attr("transform", "translate(" + offset[0] + "," + offset[1] + ")");
 
@@ -362,8 +365,8 @@ function render_radars(data_or_path, params, tweak_default_params) {
             }
             return vertices;
         }
-        blob_polygon_vertices = get_polygon_vertices(num_signals*2, radius); // n*2 for intermediate pts
         label_vertices = get_polygon_vertices(num_signals, label_radius);
+        blob_polygon_vertices = get_polygon_vertices(num_signals*2, radius); // n*2 for intermediate pts
 
         /************************************************************************
         * DRAW BACKGROUND CIRCLES
@@ -449,11 +452,14 @@ function render_radars(data_or_path, params, tweak_default_params) {
             }
             return coords;
         };
-        blob_coords = get_blob_coords(center, blob_polygon_vertices, signals, intermediate_pts_value);
+        for (var i = 0; i < signals.length; i++) {
+            blob_coords.push(get_blob_coords(center, blob_polygon_vertices, signals[i], intermediate_pts_value));
+        }
 
-        function draw_img_blob(i) {
+        function draw_img_blob() {
             // TODO: better img_pad_ratio. Point is for max value to not outermost circle
             var img_pad_ratio = Math.min(1.0, 1.1*Math.max(...signals));
+            var new_time_period = $('input[name=time_period]:checked').val();
             var img_blob = fig_svg
                 .append('g')
                 .attr('class', 'blob');
@@ -462,7 +468,7 @@ function render_radars(data_or_path, params, tweak_default_params) {
                 .insert('clipPath')
                 .attr("id", "pic")
                 .append('path')
-                .attr("d", cardinal_line(blob_coords))
+                .attr("d", cardinal_line(blob_coords[new_time_period]))
                 .attr("stroke", "#0065cc")
                 .attr("stroke-width", 2);
 
@@ -485,21 +491,28 @@ function render_radars(data_or_path, params, tweak_default_params) {
                 .attr('clip-path', 'url(#pic)');
         }
         if (display_photo) {
-            draw_img_blob(i);
+            draw_img_blob();
         }
         
         // DRAW COLOR BLOB.
-        function draw_color_blob(i) {
+        var prev_checked_time_period = global_time_period;
+        function draw_color_blob() {
+            var new_time_period = $('input[name=time_period]:checked').val();
             var color_blob = fig_svg
                 .append('g')
                 .attr('class', 'blob')
-                .append('path')
-                .attr('d', cardinal_line(blob_coords))
                 // .attr("stroke-width", 2)
                 .attr('opacity', color_blob_opacity)
-                .attr('fill', blob_color);
+                .attr('fill', blob_color)
+
+            color_blob
+                .append('path')
+                .attr('d', cardinal_line(blob_coords[prev_checked_time_period]))
+                .transition().delay(0).duration(2500)
+                .attr('d', cardinal_line(blob_coords[new_time_period]));
+            prev_checked_time_period = new_time_period;
         }
-        draw_color_blob(i);
+        draw_color_blob();
 
         /************************************************************************
         * ADD FINAL SCORE TO MIDDLE OF BLOB
@@ -614,7 +627,7 @@ function render_radars(data_or_path, params, tweak_default_params) {
                 .attr('x', center[0])
                 .attr('y', center[1] + 1.3 * label_radius) // TODO: auto placement?
                 // .text(name + ' (' + final_score + ')')
-                .text(name)
+                .text(to_title_case(name))
                 .attr('font-family', 'Helvetica Neue, Helvetica, sans-serif')
                 .attr('font-size', name_fontsize)
                 .attr('opacity', 0.7)
@@ -628,20 +641,48 @@ function render_radars(data_or_path, params, tweak_default_params) {
         * TODO: Update shapes without fully redrawing? Having trouble with tension.
         **************************************************************************/
         $('input.local').on('input', function() {
-            redraw_blob(i);
+            redraw_blob(kth);
         });
 
-        function redraw_blob(i) {
+        // Listener for time period toggle
+        $('#time_periods').on('change', function() {
+            redraw_blob(kth);
+        });
+
+        function redraw_blob(kth) {
+            update_global_vars();
+
             update_tweak_params();
-            $('#fig_' + i + ' .blob').remove();
+
+            $('#fig_' + kth + ' .blob').remove();
+
             define_cardinal_line(tension);            // In case tension changed
-            blob_coords = get_blob_coords(center, blob_polygon_vertices, signals, intermediate_pts_value);  // In case ctrl pts changed
-            if (display_photo) {
-                draw_img_blob(i);
+
+            // Redefine blob coordinates
+            blob_coords = [];
+            for (var i = 0; i < signals.length; i++) {
+                blob_coords.push(get_blob_coords(center, blob_polygon_vertices, signals[i], intermediate_pts_value));
             }
-            draw_color_blob(i);
+
+            // Display blobs
+            if (display_photo) {
+                draw_img_blob();
+            }
+            draw_color_blob();
         }
     }
 
-}
+    // Global vars are used to keep state, used especially for dashboard
+    function update_global_vars() {
+        global_time_period = $('input[name=time_period]:checked').val();
 
+        global_tweak_params = {};
+        global_tweak_params['tension'] = $('#tension').val();
+        global_tweak_params['intermediate_pts_value'] = $('#intermediate_pts_value').val();
+        global_tweak_params['color_blob_opacity'] = $('#color_blob_opacity').val();
+        global_tweak_params['fig_dim'] = parseInt($('#fig_dim').val());
+        global_tweak_params['max_svg_width'] = parseInt($('#max_svg_width').val());
+        global_tweak_params['blob_color'] = $('#blob_color').spectrum('get').toHexString();
+    }
+
+}

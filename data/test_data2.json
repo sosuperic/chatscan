@@ -17,4 +17,23 @@
       "guns": 4.4
     }
   }
+}, {
+  "start": "2015-12-21",
+  "end": "2015-12-27",
+  "data": {
+    "John Kasich": {
+      "immigration": 2,
+      "economy": 1.23,
+      "foreign policy": 3.56,
+      "education": 0.89,
+      "guns": 4.2
+    },
+    "Hillary Clinton": {
+      "immigration": 4.6,
+      "economy": 4.3,
+      "foreign policy": 2.3,
+      "education": 2.2,
+      "guns": 1.4
+    }
+  }
 }]

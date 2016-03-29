@@ -3,7 +3,7 @@ Radar chart visualizations
 
 ## Usage
 - Your HTML should have an empty div with id viz, i.e. `<div id="viz"></div>`
-- After importing radar.js and the required js/css dependencies, call `render_radars(data_or_path, params, default_tweak_params)`, where data_or_path is either a js object or a path to a csv/json file, params is an associative array that controls display/data normalization parameters, and default_tweak_params is 
+- After importing radar.js and the required js/css dependencies, call `render_radars(data_or_path, params, default_tweak_params)`, where data_or_path is either a js object or a path to a json file, params is an associative array that controls display/data normalization parameters, and default_tweak_params is 
 an associative array that controls default values for tweakable paramters such as 
 size and color. 
 
@@ -16,7 +16,8 @@ size and color.
 - display_photo: boolean, show photo in blob. Photo filename must be same as name
 - tweak_mode: boolean, show tweakable parameters sliders and inputs controlling size and color
 - normalize_data: boolean, option to normalize data
-- normalize_by: string - 'person' or 'all', normalize per radar chart or across all 
+- normalize_by: string - 'person', normalize per radar chart
+- initial_time_period: int, if json contains radars for multiple time periods, which one to show initially
 
 ## Tweak Paramters
 - Default values found in initialize_tweak_params and initialize_colorpicker
@@ -31,13 +32,6 @@ size and color.
 - Because files cannot be opened in browsers locally, run a webserver for that directory e.g.
   `python -m SimpleHTTPServer 8888 &` and visit http://localhost:8888/fingerprint.html
 
-## CSV files
-- File format:
-```
-  Name,category1,category2,category3
-  Eric,0.3,0.4,0.5
-  Atlas,0.2,0.6,0.4
-```
 ## JSON files / Javascript objects
 - Format:
 ```

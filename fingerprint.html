@@ -26,9 +26,11 @@
         /*************************************************************************
         * VARIABLES TO BE SET BY USER
         **************************************************************************/
-        const DATA_OR_PATH = 'data/blatant-assoc_topic-cand_2016-01-01_-_2016-01-29.csv';
         // const DATA_OR_PATH = 'data/test_data.json';
-        // const DATA_OR_PATH = {
+        const DATA_OR_PATH = 'data/test_data2.json';
+        // const DATA_OR_PATH = [{
+        //       "start": "jan",
+        //       "end": "dec",
         //       "data": {
         //         "John Kasich": {
         //           "immigration": 4,
@@ -45,7 +47,7 @@
         //           "guns": 4.4
         //         }
         //       }
-        //     }
+        //     }];
 
         // Other params and their defaults found in read_params of render_radars
         var params = {
@@ -53,14 +55,15 @@
             'display_axes': false,
             'normalize_data': true,
             'normalize_by': 'person',
+            'initial_time_period': 0,   // 0-indexed
         };
 
         var tweak_default_params = {
             'tension': 0.8,
-            'intermediate_pts_value': 0.3,
+            'intermediate_pts_value': 0.5,
             // 'color_blob_opacity': 0.2,
-            'blob_color': '#323232',
-            'fig_dim': 100,
+            'blob_color': '#ee3131',
+            'fig_dim': 300,
             // 'max_svg_width': 500,
         };
 
