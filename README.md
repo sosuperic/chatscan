@@ -1,6 +1,8 @@
 # radar
 Radar chart visualizations
 
+<img src="trumpchatscan.png" width="350px"/>
+
 ## Usage
 - Your HTML should have an empty div with id viz, i.e. `<div id="viz"></div>`
 - After importing radar.js and the required js/css dependencies, call `render_radars(data_or_path, params, default_tweak_params)`, where data_or_path is either a js object or a path to a json file, params is an associative array that controls display/data normalization parameters, and default_tweak_params is 
